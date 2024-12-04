@@ -14,35 +14,12 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class LoginInterceptor implements HandlerInterceptor {
-    private StringRedisTemplate stringRedisTemplate;
-
-    public LoginInterceptor(StringRedisTemplate stringRedisTemplate) {
-        this.stringRedisTemplate = stringRedisTemplate;
-    }
-
-
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-
-        String token = request.getHeader("authorization");
-        if (StrUtil.isBlank(token)) {
+        if (UserHolder.getUser() == null) {
             response.setStatus(401);
             return false;
         }
-
-        String key = RedisConstants.LOGIN_USER_KEY + token;
-//        String key = token;
-        Map<Object, Object> userMap = stringRedisTemplate.opsForHash().entries(key);
-        if (userMap.isEmpty()) {
-            response.setStatus(401);
-            return false;
-        }
-
-        UserDTO userDTO = BeanUtil.fillBeanWithMap(userMap, new UserDTO(), false);
-        UserHolder.saveUser(userDTO);
-
-
-        stringRedisTemplate.expire(key, RedisConstants.LOGIN_USER_TTL, TimeUnit.MINUTES);
         return true;
     }
 
