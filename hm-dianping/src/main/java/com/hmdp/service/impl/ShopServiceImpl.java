@@ -37,6 +37,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     private void unLock(String key) {
         stringRedisTemplate.delete(key);
     }
+
     
     
     @Override
@@ -45,6 +46,9 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         Shop shop = queryWithPassThrough(id);
 
         shop = queryWithMutex(id);
+        if (shop==null) {
+            return Result.fail("店铺不存在");
+        }
 
         return Result.ok(shop);
 
@@ -79,7 +83,29 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         if (shopJson != null) {
             return null;
         }
-        return null;
+
+//        缓存重建
+        String lockKey = RedisConstants.LOCK_SHOP_KEY +id;
+        Shop shop = null;
+        try {
+            boolean isLock = tryLock(lockKey);
+            if (!isLock) {
+                Thread.sleep(50);
+                return queryWithMutex(id);
+            }
+
+            shop = getById(id);
+            if (shop==null) {
+                stringRedisTemplate.opsForValue().set(RedisConstants.CACHE_SHOP_KEY +id, "",RedisConstants.CACHE_NULL_TTL, TimeUnit.MINUTES);
+                return null;
+            }
+            stringRedisTemplate.opsForValue().set(RedisConstants.CACHE_SHOP_KEY +id, JSONUtil.toJsonStr(shop),RedisConstants.CACHE_SHOP_TTL, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            unLock(lockKey);
+        }
+        return shop;
     }
 
     @Override
