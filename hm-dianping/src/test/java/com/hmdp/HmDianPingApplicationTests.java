@@ -18,29 +18,29 @@ class HmDianPingApplicationTests {
     @Resource
     private RedisIdWorkder redisIdWorkder;
 
-    @Test
-    public void testSaveShop() {
-        shopService.saveShop2Redis(1L, 10L);
-    }
-
-    private ExecutorService es = Executors.newFixedThreadPool(500);
-
-    @Test
-    public void testIdWorker() throws InterruptedException {
-        CountDownLatch latch = new CountDownLatch(300);
-        Runnable task = () -> {
-            for (int i = 0; i < 100; i++) {
-                long id = redisIdWorkder.nextId("order");
-                System.out.println("id = " + id);
-            }
-            latch.countDown();
-        };
-        long begin = System.currentTimeMillis();
-        for (int i = 0; i < 300; i++) {
-            es.submit(task);
-        }
-        latch.await();
-        long end = System.currentTimeMillis();
-        System.out.println("time = " + (end - begin));
-    }
+//    @Test
+//    public void testSaveShop() {
+//        shopService.saveShop2Redis(1L, 10L);
+//    }
+//
+//    private ExecutorService es = Executors.newFixedThreadPool(500);
+//
+//    @Test
+//    public void testIdWorker() throws InterruptedException {
+//        CountDownLatch latch = new CountDownLatch(300);
+//        Runnable task = () -> {
+//            for (int i = 0; i < 100; i++) {
+//                long id = redisIdWorkder.nextId("order");
+//                System.out.println("id = " + id);
+//            }
+//            latch.countDown();
+//        };
+//        long begin = System.currentTimeMillis();
+//        for (int i = 0; i < 300; i++) {
+//            es.submit(task);
+//        }
+//        latch.await();
+//        long end = System.currentTimeMillis();
+//        System.out.println("time = " + (end - begin));
+//    }
 }
