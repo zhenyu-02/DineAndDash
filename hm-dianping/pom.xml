@@ -76,6 +76,11 @@
             <artifactId>aspectjrt</artifactId>
             <version>1.9.7</version> <!-- 请确保版本与 aspectjweaver 一致 -->
         </dependency>
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson</artifactId>
+            <version>3.13.6</version>
+        </dependency>
 
 
     </dependencies>
